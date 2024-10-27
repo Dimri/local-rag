@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import axios from "axios";
 import { FaUpload } from 'react-icons/fa';
 
 const FileUpload = () => {
@@ -12,18 +13,25 @@ const FileUpload = () => {
     console.log('Selected file:', file);
   };
 
-  const handleUpload = (event) => {
+  const handleUpload = async (event) => {
     event.stopPropagation();
     if (selectedFile) {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      // try {
-      //   const resposne = await axios.post("https://")
-      // }
-      console.log('Uploading file:', selectedFile);
-      // Reset the file input and state after upload
-      setSelectedFile(null);
+
+      try {
+        const response = await axios.post("http://localhost:8001/upload/", formData, {
+          "headers": { "Content-Type": "multipart/form-data", }
+        }
+        )
+        console.log("File uploaded successfully:", response.data);
+        setSelectedFile(null);
+        alert("File uploaded successfully!")
+      } catch (error) {
+        console.error("Error uploading file:", error)
+        alert("Failed to upload file. Please try again.")
+      }
     } else {
       alert('Please select a file first.');
     }
