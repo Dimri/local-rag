@@ -1,26 +1,17 @@
-import React, { useEffect } from 'react';
+import React from "react";
+import { useLocation } from "react-router-dom";
 
-const PDFViewer = ({ fileUrl }) => {
+const PDFViewer = () => {
+  const location = useLocation();
+  const { fileUrl } = location.state || null;
   // Cleanup the URL when the component unmounts
-  useEffect(() => {
-    return () => {
-      if (fileUrl) {
-        URL.revokeObjectURL(fileUrl);
-      }
-    };
-  }, [fileUrl]);
-
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Half: PDF Viewer */}
       <div className="w-1/2 border-r border-gray-400 p-4">
-        <iframe
-          src={fileUrl}
-          className="w-full h-full"
-          title="PDF Viewer"
-        />
+        <iframe src={fileUrl} className="w-full h-full" title="PDF Viewer" />
       </div>
-      
+
       {/* Right Half: Chat UI */}
       <div className="w-1/2 p-4">
         <h2 className="text-2xl font-semibold mb-4">Chat</h2>
@@ -30,11 +21,11 @@ const PDFViewer = ({ fileUrl }) => {
             <strong>User:</strong> Hello, how can I help you?
           </div>
           <div className="mb-2">
-            <strong>Assistant:</strong> Please upload a document.
+            <strong>Assistant:</strong>
           </div>
           {/* Additional chat messages can be added here */}
         </div>
-        
+
         {/* Chat Input */}
         <div className="mt-4">
           <textarea

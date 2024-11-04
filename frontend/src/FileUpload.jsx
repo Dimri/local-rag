@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 const FileUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [fileUrl, setFileUrl] = useState(null);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
+    setFileUrl(URL.createObjectURL(file));
     console.log("Selected file:", file);
   };
 
@@ -20,7 +22,6 @@ const FileUpload = () => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("file", selectedFile);
-
       try {
         const response = await axios.post(
           "http://localhost:8000/upload/",
@@ -30,7 +31,6 @@ const FileUpload = () => {
           }
         );
         console.log("File uploaded successfully:", response.data);
-        const fileUrl = URL.createObjectURL(selectedFile);
         setSelectedFile(null);
         navigate("/view-pdf", { state: { fileUrl: fileUrl } });
       } catch (error) {

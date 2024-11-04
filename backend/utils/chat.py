@@ -4,12 +4,13 @@ from time import perf_counter as timer
 from unsloth import FastLanguageModel
 from sentence_transformers import SentenceTransformer, util
 from models.model import load_llm
-from embeddings import load_embedding_model, create_embeddings
+from .embeddings import load_embedding_model, create_embeddings
 
 
 ## globally define and load LLM, tokenizer and embedding model
 llm_model, tokenizer = load_llm()
 embedding_model = load_embedding_model()
+
 
 def prompt_formatter(query: str, context_items: list[dict]) -> str:
     context = "- " + "\n- ".join([item["sentence_chunk"] for item in context_items])

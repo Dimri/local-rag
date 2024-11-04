@@ -1,6 +1,6 @@
 import torch
 import pandas as pd
-from pdf_parser import chunking
+from .pdf_parser import chunking
 from sentence_transformers import SentenceTransformer
 
 

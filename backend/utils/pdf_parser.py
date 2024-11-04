@@ -59,7 +59,7 @@ def split_list(input_list: list[str], split_size: int) -> list[list[str]]:
     ]
 
 
-def chunking(pdf_path):
+def chunking(pdf_path: str) -> list[dict[str, str]]:
     pages_and_texts = open_and_read_pdf(pdf_path)
     # convert text in to spacy object and extract some stats using spacy
     nlp = English()
