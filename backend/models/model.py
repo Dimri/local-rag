@@ -4,7 +4,7 @@ from unsloth import FastLanguageModel
 
 def load_llm(model_id="unsloth/Llama-3.2-1B-Instruct-bnb-4bit"):
     llm_model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=model_id, dtype=None, load_in_4bit=True
+        model_name=model_id, dtype=None, load_in_4bit=True, device_map="cuda"
     )
     return llm_model, tokenizer
 

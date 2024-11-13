@@ -4,12 +4,13 @@ from time import perf_counter as timer
 from unsloth import FastLanguageModel
 from sentence_transformers import SentenceTransformer, util
 from models.model import load_llm
-from .embeddings import load_embedding_model, create_embeddings
+from .embeddings import load_embedding_model
 
 
 ## globally define and load LLM, tokenizer and embedding model
 llm_model, tokenizer = load_llm()
 embedding_model = load_embedding_model()
+device = "cuda"
 
 
 def prompt_formatter(query: str, context_items: list[dict]) -> str:
@@ -49,6 +50,7 @@ def retrieve_relevant_resources(
 ):
     # embed
     query_embedding = model.encode(query, convert_to_tensor=True)
+    query_embedding = query_embedding.to(device)
     # dot product scores
     start_time = timer()
     dot_scores = util.dot_score(query_embedding, embeddings)[0]
@@ -91,7 +93,9 @@ def ask(
     scores, indices = retrieve_relevant_resources(query=query, embeddings=embeddings)
 
     # read text_chunks_and_embeddings_df from file
-    pages_and_chunks = pd.read_csv("text_chunks_and_embeddings.py").to_dict()
+    pages_and_chunks = pd.read_csv("text_chunks_and_embeddings_df.csv").to_dict(
+        orient="records"
+    )
 
     # create a list of context items
     context_items = [pages_and_chunks[i] for i in indices]
@@ -104,7 +108,7 @@ def ask(
     prompt = prompt_formatter(query=query, context_items=context_items)
 
     # generation
-    input_ids = tokenizer(prompt, return_tensors="pt").to("cuda")
+    input_ids = tokenizer(prompt, return_tensors="pt").to(device)
 
     # generate an output of tokens
     outputs = llm_model.generate(
@@ -112,7 +116,7 @@ def ask(
     )
 
     # decode the tokens into text
-    output_text = tokenizer.decode(outputs[0])
+    output_text = tokenizer.decode(outputs[0], clean_up_tokenizaton_spaces=True)
 
     end_header_id = "<|end_header_id|>"
     end_char = output_text.rfind(end_header_id)
