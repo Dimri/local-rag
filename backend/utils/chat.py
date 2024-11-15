@@ -1,28 +1,18 @@
-import torch
-import pandas as pd
-from time import perf_counter as timer
 from unsloth import FastLanguageModel
-from sentence_transformers import SentenceTransformer, util
 from models.model import load_llm
-from .embeddings import load_embedding_model
+from .vectordb import search_collection
 
 
 ## globally define and load LLM, tokenizer and embedding model
 llm_model, tokenizer = load_llm()
-embedding_model = load_embedding_model()
 device = "cuda"
 
 
 def prompt_formatter(query: str, context_items: list[dict]) -> str:
-    context = "- " + "\n- ".join([item["sentence_chunk"] for item in context_items])
-    base_prompt = """Based on the following context items, please answer the query.
-Give yourself room to think by extracting relevant passages from the context before answering the query.
-Don't return the thinking, only return the answer.
-Make sure your answers are as explanatory as possible.
-Context items:
-{context}
-\nRelevant passages: <extract relevant passages from the context here>
-User Query: {query}
+    context = "- " + "\n- ".join([item["text"] for item in context_items])
+    base_prompt = """Query: {query} 
+Context: {context} 
+You are an assistant for question-answering tasks. Use the above pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Keep the answer concise. If you have more to say, first give the consise answer and then add to it in the next paragraph. Do not include any pretext or post-text in the answer.
 Answer:"""
 
     base_prompt = base_prompt.format(context=context, query=query)
@@ -30,7 +20,7 @@ Answer:"""
     dialogue_template = [
         {
             "role": "system",
-            "content": "Give crisp answer followed by an explanantion.\n",
+            "content": "You are an AI assistant designed for efficient question-answering. Utilize the provided context to formulate a concise answer to the question.",
         },
         {"role": "user", "content": base_prompt},
     ]
@@ -41,68 +31,16 @@ Answer:"""
     return prompt
 
 
-def retrieve_relevant_resources(
-    query: str,
-    embeddings: torch.tensor,
-    model: SentenceTransformer = embedding_model,
-    n_resources_to_return: int = 5,
-    print_time: bool = True,
-):
-    # embed
-    query_embedding = model.encode(query, convert_to_tensor=True)
-    query_embedding = query_embedding.to(device)
-    # dot product scores
-    start_time = timer()
-    dot_scores = util.dot_score(query_embedding, embeddings)[0]
-    end_time = timer()
-
-    if print_time:
-        print(
-            f"[INFO] time taken to get scores on {len(embeddings)} embeddings: {end_time - start_time:.6f} seconds"
-        )
-
-    scores, indices = torch.topk(input=dot_scores, k=n_resources_to_return)
-    return scores, indices
-
-
-# def print_top_results_and_scores(
-#     query: str,
-#     embeddings: torch.tensor,
-#     pages_and_chunks: list[dict] = pages_and_chunks,
-#     n_resources_to_return: int = 5,
-# ):
-#     top_results_dot_product = retrieve_relevant_resources(query, embeddings)
-#     for score, idx in zip(top_results_dot_product[0], top_results_dot_product[1]):
-#         print(f"Score: {score:.4f}")
-#         print("Text:")
-#         print_wrapped(pages_and_chunks[idx]["sentence_chunk"])
-#         print(f"Page number: {pages_and_chunks[idx]['page_number']}")
-#         print()
-
-
 def ask(
     query: str,
-    embeddings: torch.tensor,
+    collection,
     temperature: float = 0.7,
-    max_new_tokens=256,
+    max_new_tokens=512,
     format_answer_text=True,
-    return_answer_only=True,
 ):
     FastLanguageModel.for_inference(llm_model)
     # get indices and scores of top related results
-    scores, indices = retrieve_relevant_resources(query=query, embeddings=embeddings)
-
-    # read text_chunks_and_embeddings_df from file
-    pages_and_chunks = pd.read_csv("text_chunks_and_embeddings_df.csv").to_dict(
-        orient="records"
-    )
-
-    # create a list of context items
-    context_items = [pages_and_chunks[i] for i in indices]
-
-    # add score to context item
-    for i, item in enumerate(context_items):
-        item["score"] = scores[i].cpu()
+    context_items = search_collection(query=query, collection=collection)
 
     # augmentation
     prompt = prompt_formatter(query=query, context_items=context_items)
@@ -129,9 +67,5 @@ def ask(
         output_text = output_text.replace("<|begin_of_text|>", "").replace(
             "<|eot_id|>", ""
         )
-
-    # only return the answer without context items
-    if return_answer_only:
-        return output_text
 
     return output_text, context_items

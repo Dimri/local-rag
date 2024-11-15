@@ -66,22 +66,59 @@ const PDFViewer = () => {
         </div>
 
         {/* Chat Input */}
-        <div className="mt-4">
-          <textarea
-            value={currentMessage}
-            onChange={handleInputChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            rows="4"
-            placeholder="Type your message..."
-          ></textarea>
-          <button
-            onClick={handleSendMessage}
-            className="mt-2 w-full bg-black text-white p-2 rounded"
-          >
-            Send
-          </button>
-        </div>
+        {/* <div className="flex flex-col md:flex-row items-start mt-4">
+          <div className="flex-grow mr-0 md:mr-4">
+            <textarea
+              value={currentMessage}
+              onChange={handleInputChange}
+              class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Your message..."
+              className="w-full h-10 p-2 border border-gray-300 rounded resize-y"
+            ></textarea> */}
+
+        <form>
+          <div class="flex items-center px-3 py-2 rounded mt-2">
+            <textarea
+              value={currentMessage}
+              onChange={handleInputChange}
+              class="min-h-12 rounded resize-y block mx-2 p-2.5 w-full text-sm text-gray-900 bg-white border border-gray-300 scrollbar-none"
+              placeholder="Your message..."
+            ></textarea>
+            <button
+              type="submit"
+              onClick={handleSendMessage}
+              className="h-12 inline-flex justify-center items-center p-3 bg-black rounded cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+            >
+              <svg
+                className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="white"
+                viewBox="0 0 18 20"
+              >
+                <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        {/* <textarea
+              value={currentMessage}
+              onChange={handleInputChange}
+              className="w-full h-10 p-2 border border-gray-300 rounded resize-y"
+              placeholder="Type your message..."
+            ></textarea> */}
       </div>
+      {/* <div className="mt-4 md:mt-0">
+            <button
+              onClick={handleSendMessage}
+              className="h-10 px-4 bg-black text-white rounded"
+            >
+              Send
+            </button>
+          </div> */}
+      {/* </div> */}
+      {/* </div> */}
     </div>
   );
 };
