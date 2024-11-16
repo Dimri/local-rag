@@ -10,10 +10,22 @@ device = "cuda"
 
 def prompt_formatter(query: str, context_items: list[dict]) -> str:
     context = "- " + "\n- ".join([item["text"] for item in context_items])
-    base_prompt = """Query: {query} 
-Context: {context} 
-You are an assistant for question-answering tasks. Use the above pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Keep the answer concise. If you have more to say, first give the consise answer and then add to it in the next paragraph. Do not include any pretext or post-text in the answer.
-Answer:"""
+    base_prompt = """Query: {query}
+Context: {context}
+
+You are a highly skilled assistant designed to answer questions based on the provided context. Your response should be in your own words. Your response should be structured in markdown, and you should only use the context that is directly relevant to the query.
+
+Do the following:
+- Ensure you fully understand what is being asked in the query.
+- Evaluate the provided context and use only the relevant parts to inform your answer. If the context isn't helpful or relevant, do not use it.
+- Provide the most concise answer possible. If more explanation is needed, add a follow-up paragraph with further details.
+- If you do not know the answer, simply say "I don't know."
+- For vague or unclear queries, give a concise, relevant response or clarification of the topic without unnecessary elaboration.
+
+Do not include any pre-text, post-text, or instructions in your final answer. Provide the answer directly, structured in markdown as needed.
+
+Answer:
+"""
 
     base_prompt = base_prompt.format(context=context, query=query)
     # create prompt template for instruction tuned model

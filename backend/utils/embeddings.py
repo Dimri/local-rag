@@ -8,8 +8,7 @@ def load_embedding_model(model_name="all-mpnet-base-v2"):
 
 
 def add_embeddings(pdf_path: str, embedding_model: SentenceTransformer):
-    print("inside add_embeddings")
-    chunks = chunking(pdf_path)
+    chunks = chunking(pdf_path, chunk_size=400, chunk_overlap=100)
     for chunk in chunks:
         chunk.metadata["embedding"] = embedding_model.encode(chunk.page_content)
     return chunks

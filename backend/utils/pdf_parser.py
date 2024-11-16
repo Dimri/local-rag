@@ -25,7 +25,6 @@ def text_formatter(text: str) -> str:
 
 
 def open_and_read_pdf(pdf_path: str) -> list[dict]:
-    print("inside open_and_read_pdf")
     md_doc: list[dict] = pymupdf4llm.to_markdown(pdf_path, page_chunks=True)
     pages_and_texts = []
     for doc in md_doc:
@@ -43,7 +42,6 @@ def open_and_read_pdf(pdf_path: str) -> list[dict]:
 
 
 def chunking(pdf_path: str, chunk_size: int = 250, chunk_overlap: int = 30):
-    print("inside chunking")
     pages_and_texts = open_and_read_pdf(pdf_path)
     # chunking sentences
     headers_to_split_on = [("#" * i, f"Header {i}") for i in range(1, 7)]

@@ -12,7 +12,6 @@ embedding_model = load_embedding_model()
 
 
 def vectordb_client() -> weaviate.client.Client:
-    # Best practice: store your credentials in environment variables
     weaviate_url = os.getenv("WEAVIATE_URL")
     weaviate_api_key = os.getenv("WEAVIATE_API_KEY")
 
@@ -32,7 +31,7 @@ def upload_documents(
     documents, collection: weaviate.collections.Collection
 ) -> list[str]:
     data_objects = []
-    for doc in documents:
+    for doc in tqdm(documents):
         # metadata_with_only_headers = {k: v for k, v in doc.metadata.items() if k.startswith("header")}
         # Add each document to the batch
         properties = {
@@ -45,17 +44,19 @@ def upload_documents(
         )
         data_objects.append(data_object)
 
-    response = collection.data.insert_many(data_objects)
+    collection.data.insert_many(data_objects)
     print("Upload completed.")
 
 
 def search_collection(
-    query: str, collection: weaviate.collections.Collection
+    query: str, collection: weaviate.collections.Collection, k: int = 5
 ) -> list[dict[str, Any]]:
     query_vector = embedding_model.encode(query)
-    response = collection.query.near_vector(
-        near_vector=query_vector, limit=3, return_metadata=MetadataQuery(distance=True)
+    response = collection.query.hybrid(
+        query=query,
+        vector=query_vector,
+        limit=k,
+        return_metadata=MetadataQuery(distance=True),
     )
-    # print(response.objects[0].properties.keys())
     result = [o.properties for o in response.objects]
     return result
