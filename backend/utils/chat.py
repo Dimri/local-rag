@@ -1,7 +1,7 @@
-from unsloth import FastLanguageModel
 from models.model import load_llm
-from .vectordb import search_collection
+from unsloth import FastLanguageModel
 
+from .vectordb import search_collection
 
 ## globally define and load LLM, tokenizer and embedding model
 llm_model, tokenizer = load_llm()

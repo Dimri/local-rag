@@ -1,10 +1,12 @@
 import os
-import weaviate
-from tqdm import tqdm
-from dotenv import load_dotenv
-from weaviate.classes.init import Auth, AdditionalConfig, Timeout
-from weaviate.classes.query import MetadataQuery
 from typing import Any
+
+import weaviate
+from dotenv import load_dotenv
+from tqdm import tqdm
+from weaviate.classes.init import AdditionalConfig, Auth, Timeout
+from weaviate.classes.query import MetadataQuery
+
 from .embeddings import load_embedding_model
 
 load_dotenv()
